@@ -80,7 +80,7 @@ const loading = ref(false);
 async function onSubmit() {
   loading.value = true;
   try {
-    const response = await fetch('/api/user', {
+    const response = await fetch('http://localhost:5170/api/user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
