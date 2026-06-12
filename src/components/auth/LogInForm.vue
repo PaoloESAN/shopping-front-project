@@ -27,50 +27,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useQuasar } from 'quasar'
+import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import axios from 'axios';
 
-const $q = useQuasar()
+const $q = useQuasar();
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
+const email = ref('');
+const password = ref('');
+const loading = ref(false);
 
-async function onSubmit() {
-  loading.value = true
-  try {
-    const response = await fetch('http://localhost:5170/api/user/SignIn', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value }),
+function onSubmit() {
+  loading.value = true;
+  axios
+    .post('http://localhost:5170/api/user/SignIn', {
+      email: email.value,
+      password: password.value,
     })
-
-    if (response.status === 401) {
+    .then(() => {
       $q.notify({
-        type: 'negative',
-        message: 'Credenciales inválidas',
+        type: 'positive',
+        message: 'Inicio de sesión exitoso',
         position: 'top',
-      })
-      return
-    }
-
-    if (!response.ok) {
-      throw new Error('Request failed')
-    }
-
-    $q.notify({
-      type: 'positive',
-      message: 'Inicio de sesión exitoso',
-      position: 'top',
+      });
     })
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: 'Error al iniciar sesión',
-      position: 'top',
+    .catch((error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        $q.notify({
+          type: 'negative',
+          message: 'Credenciales inválidas',
+          position: 'top',
+        });
+      } else {
+        $q.notify({
+          type: 'negative',
+          message: 'Error al iniciar sesión',
+          position: 'top',
+        });
+      }
     })
-  } finally {
-    loading.value = false
-  }
+    .finally(() => {
+      loading.value = false;
+    });
 }
 </script>

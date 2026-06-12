@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
+import axios from 'axios';
 
 const $q = useQuasar();
 
@@ -77,41 +78,35 @@ const country = ref('');
 const address = ref('');
 const loading = ref(false);
 
-async function onSubmit() {
+function onSubmit() {
   loading.value = true;
-  try {
-    const response = await fetch('http://localhost:5170/api/user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        firstName: firstName.value,
-        lastName: lastName.value,
-        email: email.value,
-        password: password.value,
-        dateOfBirth: dateOfBirth.value,
-        country: country.value,
-        address: address.value,
-        type: 'user',
-      }),
+  axios
+    .post('http://localhost:5170/api/user', {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: email.value,
+      password: password.value,
+      dateOfBirth: dateOfBirth.value,
+      country: country.value,
+      address: address.value,
+      type: 'user',
+    })
+    .then(() => {
+      $q.notify({
+        type: 'positive',
+        message: 'Registro exitoso',
+        position: 'top',
+      });
+    })
+    .catch(() => {
+      $q.notify({
+        type: 'negative',
+        message: 'Error en el registro',
+        position: 'top',
+      });
+    })
+    .finally(() => {
+      loading.value = false;
     });
-
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
-
-    $q.notify({
-      type: 'positive',
-      message: 'Registro exitoso',
-      position: 'top',
-    });
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: 'Error en el registro',
-      position: 'top',
-    });
-  } finally {
-    loading.value = false;
-  }
 }
 </script>
