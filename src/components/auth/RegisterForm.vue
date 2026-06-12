@@ -37,6 +37,17 @@
     />
 
     <q-input
+      v-model="confirmPassword"
+      type="password"
+      label="Repeat Password"
+      lazy-rules
+      :rules="[
+        (val: string) => !!val || 'Please repeat your password',
+        (val: string) => val === password || 'Passwords do not match',
+      ]"
+    />
+
+    <q-input
       v-model="dateOfBirth"
       type="date"
       label="Date of Birth"
@@ -58,6 +69,16 @@
       :rules="[(val: string) => !!val || 'Address is required']"
     />
 
+    <q-select
+      v-model="type"
+      :options="typeOptions"
+      label="Tipo"
+      emit-value
+      map-options
+      lazy-rules
+      :rules="[(val: string) => !!val || 'Type is required']"
+    />
+
     <q-btn label="Register" type="submit" color="primary" :loading="loading" />
   </q-form>
 </template>
@@ -65,17 +86,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+const typeOptions = [
+  { label: 'Cliente', value: 'C' },
+  { label: 'Admin', value: 'A' },
+];
+
 const $q = useQuasar();
+const router = useRouter();
 
 const firstName = ref('');
 const lastName = ref('');
 const email = ref('');
 const password = ref('');
+const confirmPassword = ref('');
 const dateOfBirth = ref('');
 const country = ref('');
 const address = ref('');
+const type = ref('C');
 const loading = ref(false);
 
 function onSubmit() {
@@ -89,7 +119,7 @@ function onSubmit() {
       dateOfBirth: dateOfBirth.value,
       country: country.value,
       address: address.value,
-      type: 'user',
+      type: type.value,
     })
     .then(() => {
       $q.notify({
@@ -97,6 +127,7 @@ function onSubmit() {
         message: 'Registro exitoso',
         position: 'top',
       });
+      return router.push('/login');
     })
     .catch(() => {
       $q.notify({
